@@ -22,59 +22,42 @@
           "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC",
           "Songti SC", SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
         overflow: hidden;
-        transition: background-color 0.3s ease;
-      }
-
-      .theme-dark {
-        background-color: #191919;
-      }
-
-      .theme-light {
-        background-color: #ffffff;
+        background: transparent !important;
       }
 
       .clock-container {
         text-align: center;
-        padding: 4vw;
-        border-radius: 4vw;
-        box-shadow: 0 2vw 12vw rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(2vw);
-        border: 0.3vw solid rgba(0, 0, 0, 0.15);
-        max-width: 95vw;
-        width: 95vw;
-        height: 95vh;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        border: none;
+        width: 100vw;
+        height: 100vh;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
+        background: transparent;
         cursor: pointer;
       }
 
-      .theme-dark .clock-container {
-        background: rgba(25, 25, 25, 0.85);
-        border-color: rgba(255, 255, 255, 0.2);
+      .theme-dark {
         color: #ffffff;
       }
 
-      .theme-light .clock-container {
-        background: rgba(255, 255, 255, 0.85);
-        border-color: rgba(0, 0, 0, 0.2);
+      .theme-light {
         color: #2c2c2b;
       }
 
       .time-display {
-        font-size: clamp(14vw, 22vh, 20vw);
+        font-size: clamp(16vw, 24vh, 22vw);
         font-weight: 700;
-        letter-spacing: 0.2vw;
+        letter-spacing: 0.15vw;
         font-variant-numeric: tabular-nums;
-        line-height: 1.05;
-        margin-bottom: 4vw;
-        text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.2);
-      }
-
-      .theme-light .time-display {
-        text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.1);
+        line-height: 1;
+        margin-bottom: 3vh;
+        text-shadow: none;
       }
 
       .seconds {
@@ -83,26 +66,26 @@
       }
 
       .theme-light .seconds {
-        opacity: 0.75;
+        opacity: 0.7;
       }
 
       .timezone-selector {
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 2vw;
-        margin-top: 1vw;
+        gap: 2.5vw;
+        margin-top: 1vh;
         flex-wrap: nowrap;
-        width: 100%;
-        max-width: 80vw;
+        width: 90vw;
+        max-width: 800px;
       }
 
       .arrow-btn {
         border: none;
-        width: 7vw;
-        height: 7vw;
-        border-radius: 1.5vw;
-        font-size: 4.5vw;
+        width: 8vw;
+        height: 8vw;
+        border-radius: 2vw;
+        font-size: 5vw;
         font-weight: bold;
         cursor: pointer;
         display: flex;
@@ -110,7 +93,7 @@
         align-items: center;
         transition: all 0.2s ease;
         flex: 0 0 auto;
-        box-shadow: 0 0.3vw 1vw rgba(0, 0, 0, 0.1);
+        box-shadow: none;
       }
 
       .theme-dark .arrow-btn {
@@ -119,7 +102,7 @@
       }
 
       .theme-light .arrow-btn {
-        background: rgba(0, 0, 0, 0.1);
+        background: rgba(44, 44, 43, 0.15);
         color: #2c2c2b;
       }
 
@@ -129,15 +112,15 @@
       }
 
       .theme-light .arrow-btn:hover {
-        background: rgba(0, 0, 0, 0.2);
+        background: rgba(44, 44, 43, 0.25);
         transform: scale(1.05);
       }
 
       .timezone-display {
-        font-size: clamp(3.5vw, 5vh, 4.5vw);
+        font-size: clamp(4vw, 5.5vh, 5vw);
         font-weight: 600;
-        min-width: 25vw;
-        padding: 1.8vw 3vw;
+        min-width: 28vw;
+        padding: 2vw 3vw;
         border-radius: 2vw;
         letter-spacing: 0.1vw;
         transition: background-color 0.2s ease;
@@ -145,49 +128,44 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        box-shadow: 0 0.3vw 1vw rgba(0, 0, 0, 0.08);
       }
 
       .theme-dark .timezone-display {
-        background: rgba(0, 0, 0, 0.25);
+        background: rgba(255, 255, 255, 0.1);
       }
 
       .theme-light .timezone-display {
-        background: rgba(0, 0, 0, 0.08);
+        background: rgba(44, 44, 43, 0.1);
       }
 
       @media (max-width: 480px) {
-        .clock-container {
-          padding: 5vw;
-          border-radius: 5vw;
-        }
-
         .timezone-selector {
-          gap: 1.5vw;
+          gap: 2vw;
+          width: 95vw;
         }
 
         .timezone-display {
-          min-width: 22vw;
-          font-size: 4vw;
-          padding: 1.5vw 2.5vw;
-          border-radius: 2vw;
-        }
-
-        .arrow-btn {
-          width: 8vw;
-          height: 8vw;
-          font-size: 5vw;
+          min-width: 24vw;
+          font-size: 4.5vw;
+          padding: 1.8vw 2.5vw;
           border-radius: 1.8vw;
         }
 
+        .arrow-btn {
+          width: 9vw;
+          height: 9vw;
+          font-size: 5.5vw;
+          border-radius: 2vw;
+        }
+
         .time-display {
-          margin-bottom: 5vw;
+          margin-bottom: 2vh;
         }
       }
     </style>
   </head>
-  <body class="theme-dark">
-    <div class="clock-container" id="clock-container">
+  <body>
+    <div class="clock-container theme-dark" id="clock-container">
       <div class="time-display" id="clock">00:00:00</div>
       <div class="timezone-selector">
         <button class="arrow-btn" id="prev-tz">←</button>
@@ -222,7 +200,6 @@
 
       let currentIndex = 1; // Comenzar con Uruguay
       let isDarkTheme = true;
-      const body = document.body;
       const clockContainer = document.getElementById("clock-container");
       const timezoneNameEl = document.getElementById("timezone-name");
       const clockEl = document.getElementById("clock");
@@ -290,9 +267,9 @@
 
         isDarkTheme = !isDarkTheme;
         if (isDarkTheme) {
-          body.className = "theme-dark";
+          clockContainer.className = "clock-container theme-dark";
         } else {
-          body.className = "theme-light";
+          clockContainer.className = "clock-container theme-light";
         }
       });
 
