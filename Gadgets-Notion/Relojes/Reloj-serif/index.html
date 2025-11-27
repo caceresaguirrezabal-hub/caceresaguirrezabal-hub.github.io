@@ -64,12 +64,12 @@
       }
 
       .time-display {
-        font-size: clamp(12vw, 20vh, 18vw);
+        font-size: clamp(14vw, 22vh, 20vw);
         font-weight: 700;
-        letter-spacing: 0.3vw;
+        letter-spacing: 0.2vw;
         font-variant-numeric: tabular-nums;
-        line-height: 1.1;
-        margin-bottom: 3vw;
+        line-height: 1.05;
+        margin-bottom: 4vw;
         text-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.2);
       }
 
@@ -90,22 +90,26 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 2.5vw;
-        margin-top: 2vw;
+        gap: 2vw;
+        margin-top: 1vw;
+        flex-wrap: nowrap;
+        width: 100%;
+        max-width: 80vw;
       }
 
       .arrow-btn {
         border: none;
-        width: 8vw;
-        height: 8vw;
-        border-radius: 2vw;
-        font-size: 5vw;
+        width: 7vw;
+        height: 7vw;
+        border-radius: 1.5vw;
+        font-size: 4.5vw;
         font-weight: bold;
         cursor: pointer;
         display: flex;
         justify-content: center;
         align-items: center;
         transition: all 0.2s ease;
+        flex: 0 0 auto;
         box-shadow: 0 0.3vw 1vw rgba(0, 0, 0, 0.1);
       }
 
@@ -130,13 +134,17 @@
       }
 
       .timezone-display {
-        font-size: clamp(4vw, 6vh, 5vw);
+        font-size: clamp(3.5vw, 5vh, 4.5vw);
         font-weight: 600;
-        min-width: 30vw;
-        padding: 2vw 4vw;
-        border-radius: 2.5vw;
-        letter-spacing: 0.15vw;
+        min-width: 25vw;
+        padding: 1.8vw 3vw;
+        border-radius: 2vw;
+        letter-spacing: 0.1vw;
         transition: background-color 0.2s ease;
+        flex: 1 1 auto;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         box-shadow: 0 0.3vw 1vw rgba(0, 0, 0, 0.08);
       }
 
@@ -155,26 +163,25 @@
         }
 
         .timezone-selector {
-          flex-direction: column;
-          gap: 3vw;
+          gap: 1.5vw;
         }
 
         .timezone-display {
-          min-width: 25vw;
-          font-size: 4.5vw;
-          padding: 2.5vw 4vw;
-          border-radius: 3vw;
+          min-width: 22vw;
+          font-size: 4vw;
+          padding: 1.5vw 2.5vw;
+          border-radius: 2vw;
         }
 
         .arrow-btn {
-          width: 10vw;
-          height: 10vw;
-          font-size: 6vw;
-          border-radius: 2.5vw;
+          width: 8vw;
+          height: 8vw;
+          font-size: 5vw;
+          border-radius: 1.8vw;
         }
 
         .time-display {
-          margin-bottom: 4vw;
+          margin-bottom: 5vw;
         }
       }
     </style>
