@@ -1,340 +1,304 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contador Personalizable</title>
+    <title>GitHub Pages Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Lyon-Text:wght@400;500;700&display=swap");
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
       body {
-        font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho",
-          "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC",
-          "Songti SC", SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
-        background: transparent;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-        width: 100%;
-        height: 100%;
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+          "Liberation Mono", monospace;
       }
-
-      .contador-container {
-        text-align: center;
-        width: 95%;
-        max-width: 100%;
-        height: 90vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+      .icon-file::before {
+        content: "[FILE] ";
+        font-weight: bold;
+        color: #60a5fa;
       }
-
-      .titulo {
-        font-size: clamp(2.5rem, 8vw, 5rem);
-        font-weight: 600;
-        margin-bottom: clamp(1rem, 4vh, 3rem);
-        color: #ffffff;
-        cursor: pointer;
-        user-select: none;
-        line-height: 1.3;
-        padding: clamp(0.5rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2rem);
-        border-radius: 8px;
-        transition: background-color 0.2s ease;
-        word-break: break-word;
-        max-width: 100%;
+      .icon-folder::before {
+        content: "[DIR]  ";
+        font-weight: bold;
+        color: #93c5fd;
       }
-
-      .titulo:hover {
-        background-color: rgba(0, 0, 0, 0.1);
+      .icon-back::before {
+        content: "[..]   ";
+        font-weight: bold;
+        color: #cbd5e1;
       }
-
-      .titulo.editando {
-        background-color: rgba(0, 0, 0, 0.2);
-        outline: none;
-      }
-
-      .contador {
-        font-size: clamp(4rem, 12vw, 8rem);
-        font-weight: 700;
-        margin: clamp(1rem, 3vh, 2rem) 0;
-        color: #ffffff;
-        line-height: 1.1;
-        min-height: 1.1em;
-      }
-
-      .botones {
-        display: flex;
-        justify-content: center;
-        gap: clamp(0.5rem, 2vw, 1.5rem);
-        margin-bottom: clamp(1rem, 3vh, 2rem);
-      }
-
-      .boton {
-        width: clamp(60px, 15vw, 100px);
-        height: clamp(60px, 15vw, 100px);
-        font-size: clamp(2rem, 6vw, 4rem);
-        font-weight: 700;
-        border: none;
-        background: transparent;
-        color: #ffffff;
-        cursor: pointer;
-        border-radius: 12px;
-        transition: all 0.2s ease;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        user-select: none;
-      }
-
-      .boton:hover {
-        background-color: rgba(0, 0, 0, 0.1);
-        transform: translateY(-4px);
-      }
-
-      .boton:active {
-        transform: translateY(0);
-      }
-
-      .boton-reset {
-        width: clamp(120px, 40vw, 250px);
-        height: clamp(50px, 8vh, 80px);
-        font-size: clamp(1.2rem, 4vw, 2.5rem);
-        font-weight: 600;
-        margin-top: clamp(1rem, 3vh, 2rem);
-        border-radius: 10px;
-        font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho",
-          "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC",
-          "Songti SC", SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
-        color: #ffffff;
-      }
-
-      @media (max-width: 480px) {
-        .contador-container {
-          height: 85vh;
-        }
-
-        .titulo {
-          font-size: clamp(2rem, 10vw, 3.5rem);
-          padding: clamp(0.5rem, 2vw, 1rem) clamp(0.8rem, 2.5vw, 1.5rem);
-        }
-
-        .contador {
-          font-size: clamp(3rem, 10vw, 6rem);
-        }
-
-        .boton {
-          width: clamp(50px, 18vw, 80px);
-          height: clamp(50px, 18vw, 80px);
-          font-size: clamp(1.8rem, 7vw, 3rem);
-        }
-
-        .boton-reset {
-          width: clamp(100px, 50vw, 200px);
-          height: clamp(45px, 7vh, 70px);
-          font-size: clamp(1rem, 4.5vw, 2rem);
-        }
-      }
-
-      @media (max-height: 500px) {
-        .contador-container {
-          height: 80vh;
-        }
-
-        .titulo {
-          margin-bottom: clamp(0.5rem, 2vh, 1.5rem);
-        }
-
-        .contador {
-          margin: clamp(0.5rem, 2vh, 1rem) 0;
-        }
-
-        .botones {
-          gap: clamp(0.3rem, 1.5vw, 1rem);
-          margin-bottom: clamp(0.5rem, 2vh, 1rem);
-        }
+      .copy-feedback {
+        font-size: 0.75rem;
+        color: #34d399;
+        opacity: 0;
+        transition: opacity 0.2s;
       }
     </style>
+    <link
+      id="dynamic-favicon"
+      rel="icon"
+      href="image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📁</text></svg>"
+    />
   </head>
-  <body>
-    <div class="contador-container">
-      <div class="titulo" id="titulo" contenteditable="false">Contador</div>
-      <div class="contador" id="valor">0</div>
-      <div class="botones">
-        <button class="boton" id="restar">−</button>
-        <button class="boton" id="sumar">+</button>
-      </div>
-      <button class="boton boton-reset" id="reset">Reset</button>
+  <body class="bg-gray-900 text-gray-200">
+    <div class="max-w-4xl mx-auto px-4 py-6">
+      <header class="mb-6">
+        <h1 class="text-xl font-bold">GitHub Pages Explorer</h1>
+        <p class="text-gray-400 mt-1">
+          Serving from:
+          <code class="bg-gray-800 px-2 py-1 rounded"
+            >https://caceresaguirrezabal-hub.github.io</code
+          >
+        </p>
+        <div class="mt-2">
+          <strong>Path:</strong>
+          <code id="current-path" class="ml-2 bg-gray-800 px-2 py-1 rounded"
+            >/</code
+          >
+        </div>
+      </header>
+
+      <main>
+        <div id="loading" class="hidden py-3 text-gray-400">
+          Loading directory contents...
+        </div>
+
+        <div
+          id="error"
+          class="hidden bg-red-900/30 border-l-4 border-red-500 p-3 mb-4"
+        >
+          <strong>Error:</strong> <span id="error-message">Unknown error.</span>
+        </div>
+
+        <div id="empty" class="hidden py-4 text-gray-500">
+          [Empty directory]
+        </div>
+
+        <div
+          id="content"
+          class="hidden bg-gray-800 rounded border border-gray-700 overflow-hidden"
+        >
+          <ul id="file-list" class="divide-y divide-gray-700"></ul>
+        </div>
+      </main>
+
+      <footer class="mt-8 text-gray-500 text-xs">
+        Copy GH Pages URLs to share live pages. Works in Notion embeds.
+      </footer>
     </div>
 
     <script>
-      // Elementos
-      const titulo = document.getElementById("titulo");
-      const valor = document.getElementById("valor");
-      const sumarBtn = document.getElementById("sumar");
-      const restarBtn = document.getElementById("restar");
-      const resetBtn = document.getElementById("reset");
-
-      // Estado
-      let contador = 0;
-      let modoClaro = false; // false = modo oscuro (#ffffff), true = modo claro (#2c2c2b)
-      let esDobleClick = false;
-      let timeoutDobleClick = null;
-
-      // Función para obtener parámetros de la URL
-      function getURLParams() {
-        const params = new URLSearchParams(window.location.search);
-        const count = params.get("count");
-        const title = params.get("title");
-        const dark = params.get("dark");
-
-        return {
-          count: count !== null ? parseInt(count) : 0,
-          title: title || "Contador",
-          dark: dark !== null ? dark === "true" : true, // true = modo oscuro (blanco), false = modo claro (negro)
-        };
-      }
-
-      // Función para actualizar la URL
-      function updateURL(count, title, isDark) {
-        const baseUrl = window.location.pathname;
-        const params = new URLSearchParams();
-        if (count !== 0) params.set("count", count);
-        if (title !== "Contador") params.set("title", title);
-        if (!isDark) params.set("dark", "false");
-
-        const newUrl =
-          baseUrl + (params.toString() ? "?" + params.toString() : "");
-
-        // Usar history.replaceState para no crear entradas en el historial
+      // === FAVICON 📁 ===
+      (function () {
         try {
-          window.history.replaceState({}, "", newUrl);
-        } catch (e) {
-          // Ignorar errores en entornos restringidos (como algunos iframes)
+          var canvas = document.createElement("canvas");
+          canvas.width = 32;
+          canvas.height = 32;
+          var ctx = canvas.getContext("2d");
+          ctx.font = "28px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#4b5563";
+          ctx.fillText("📁", 16, 16);
+          var favicon = document.getElementById("dynamic-favicon");
+          if (favicon) favicon.href = canvas.toDataURL("image/png");
+        } catch (e) {}
+      })();
+
+      // === CONFIG ===
+      var GH_PAGES_BASE = "https://caceresaguirrezabal-hub.github.io";
+      var USER = "caceresaguirrezabal-hub";
+      var REPO = "caceresaguirrezabal-hub.github.io";
+      var API_URL =
+        "https://api.github.com/repos/" + USER + "/" + REPO + "/contents";
+
+      // DOM
+      var elLoading = document.getElementById("loading");
+      var elError = document.getElementById("error");
+      var elErrorMessage = document.getElementById("error-message");
+      var elEmpty = document.getElementById("empty");
+      var elContent = document.getElementById("content");
+      var elFileList = document.getElementById("file-list");
+      var elCurrentPath = document.getElementById("current-path");
+
+      // === STATE MANAGEMENT (using hash) ===
+      function setHash(path) {
+        // Normalize: remove leading/trailing slashes
+        var clean = path.replace(/^\/+|\/+$/g, "");
+        window.location.hash = clean ? clean : "";
+      }
+
+      function getHashPath() {
+        var hash = window.location.hash.substring(1); // remove '#'
+        return decodeURIComponent(hash);
+      }
+
+      // === UI HELPERS ===
+      function show(el) {
+        el.classList.remove("hidden");
+      }
+      function hide(el) {
+        el.classList.add("hidden");
+      }
+      function setLoading() {
+        hide(elError);
+        hide(elEmpty);
+        hide(elContent);
+        show(elLoading);
+      }
+      function setError(msg) {
+        hide(elLoading);
+        hide(elEmpty);
+        hide(elContent);
+        elErrorMessage.textContent = msg;
+        show(elError);
+      }
+      function setEmpty() {
+        hide(elLoading);
+        hide(elError);
+        hide(elContent);
+        show(elEmpty);
+      }
+      function setContent() {
+        hide(elLoading);
+        hide(elError);
+        hide(elEmpty);
+        show(elContent);
+      }
+
+      function formatSize(bytes) {
+        if (!bytes) return "";
+        var units = ["B", "KB", "MB", "GB"];
+        var i = 0;
+        while (bytes >= 1024 && i < units.length - 1) {
+          bytes /= 1024;
+          i++;
         }
+        return Math.round(bytes * 10) / 10 + " " + units[i];
       }
 
-      // Cargar estado desde URL
-      function cargarEstado() {
-        const params = getURLParams();
-        contador = params.count;
-        titulo.textContent = params.title;
-        modoClaro = !params.dark; // dark=true significa modo oscuro (blanco), así que modoClaro = false
-
-        actualizarValor();
-        actualizarColores();
+      function copyToClipboard(text, button) {
+        if (!navigator.clipboard) return alert("Clipboard not supported");
+        navigator.clipboard.writeText(text).then(function () {
+          var f = document.createElement("span");
+          f.className = "copy-feedback ml-2";
+          f.textContent = "✓ Copied!";
+          button.parentNode.appendChild(f);
+          f.style.opacity = "1";
+          setTimeout(() => {
+            f.style.opacity = "0";
+            setTimeout(() => f.remove(), 200);
+          }, 1500);
+        });
       }
 
-      // Guardar estado en URL
-      function guardarEstado() {
-        const title = titulo.textContent;
-        updateURL(contador, title, !modoClaro);
-      }
+      // === NAVIGATION ===
+      function loadDirectory(path) {
+        setLoading();
+        elCurrentPath.textContent = path === "" ? "/" : "/" + path;
 
-      // Actualizar valor
-      function actualizarValor() {
-        valor.textContent = contador;
-      }
+        var url = API_URL;
+        if (path) url += "/" + encodeURIComponent(path);
 
-      // Actualizar colores según el modo
-      function actualizarColores() {
-        const color = modoClaro ? "#2c2c2b" : "#ffffff";
-        document
-          .querySelectorAll(".titulo, .contador, .boton")
-          .forEach((el) => {
-            el.style.color = color;
+        fetch(url)
+          .then(function (res) {
+            if (!res.ok)
+              return res.json().then((err) => {
+                throw new Error(err.message || "HTTP " + res.status);
+              });
+            return res.json();
+          })
+          .then(function (data) {
+            if (!Array.isArray(data)) {
+              if (data.download_url) window.open(data.download_url, "_blank");
+              return;
+            }
+
+            if (data.length === 0) {
+              setEmpty();
+              return;
+            }
+
+            elFileList.innerHTML = "";
+
+            if (path) {
+              var parentPath = path.split("/").slice(0, -1).join("/");
+              var li = document.createElement("li");
+              li.className = "px-3 py-2 hover:bg-gray-700 cursor-pointer";
+              li.innerHTML =
+                '<div class="flex items-center justify-between"><span class="icon-back"></span><span>Parent directory</span><span></span></div>';
+              li.onclick = () => navigateTo(parentPath);
+              elFileList.appendChild(li);
+            }
+
+            var dirs = data.filter((i) => i.type === "dir");
+            var files = data.filter((i) => i.type === "file");
+            [...dirs, ...files].forEach((item) => {
+              var li = document.createElement("li");
+              li.className =
+                "px-3 py-2 hover:bg-gray-700 cursor-pointer border-t border-gray-700 first:border-t-0";
+              var isDir = item.type === "dir";
+              var sizeText = isDir ? "" : " (" + formatSize(item.size) + ")";
+              var iconClass = isDir ? "icon-folder" : "icon-file";
+              var actions = "";
+              if (!isDir && item.path) {
+                var ghUrl = GH_PAGES_BASE + "/" + item.path;
+                actions =
+                  "<button onclick=\"window.open('" +
+                  ghUrl +
+                  "','_blank');event.stopPropagation();\" class=\"text-blue-400 hover:text-blue-300 text-xs mr-2\">[View]</button>" +
+                  '<a href="' +
+                  ghUrl +
+                  '" download="' +
+                  item.name +
+                  '" class="text-green-400 hover:text-green-300 text-xs mr-2">[Download]</a>' +
+                  "<button onclick=\"copyToClipboard('" +
+                  ghUrl +
+                  '\',this);event.stopPropagation();" class="text-yellow-400 hover:text-yellow-300 text-xs">[Copy GH Pages URL]</button>';
+              }
+              li.innerHTML =
+                '<div class="flex items-center justify-between">' +
+                '<div><span class="' +
+                iconClass +
+                '"></span><span>' +
+                item.name +
+                '</span><span class="text-gray-500 ml-2">' +
+                sizeText +
+                "</span></div>" +
+                "<div>" +
+                actions +
+                "</div>" +
+                "</div>";
+              if (isDir)
+                li.onclick = () =>
+                  navigateTo(path ? path + "/" + item.name : item.name);
+              elFileList.appendChild(li);
+            });
+
+            setContent();
+          })
+          .catch((err) => {
+            console.error("Load failed:", err);
+            setError("Failed: " + (err.message || "public repo required"));
           });
       }
 
-      // Cambiar modo de color: alterna entre #ffffff (por defecto) y #2c2c2b
-      function toggleModoClaro() {
-        modoClaro = !modoClaro;
-        actualizarColores();
-        guardarEstado();
+      function navigateTo(path) {
+        setHash(path); // ✅ Guarda en URL
+        loadDirectory(path);
       }
 
-      // Eventos de botones
-      sumarBtn.addEventListener("click", () => {
-        contador++;
-        actualizarValor();
-        guardarEstado();
+      // === INIT ===
+      function init() {
+        var initialPath = getHashPath();
+        loadDirectory(initialPath);
+      }
+
+      // ✅ Detect reloads & hash changes (critical for Notion)
+      window.addEventListener("hashchange", function () {
+        var newPath = getHashPath();
+        loadDirectory(newPath);
       });
 
-      restarBtn.addEventListener("click", () => {
-        contador--;
-        actualizarValor();
-        guardarEstado();
-      });
-
-      resetBtn.addEventListener("click", () => {
-        contador = 0;
-        actualizarValor();
-        guardarEstado();
-      });
-
-      // Doble click en título para editar
-      titulo.addEventListener("click", (e) => {
-        if (esDobleClick) {
-          // Segundo click: activar edición
-          clearTimeout(timeoutDobleClick);
-          titulo.contentEditable = true;
-          titulo.classList.add("editando");
-          titulo.focus();
-          esDobleClick = false;
-          return;
-        }
-
-        // Primer click: esperar para ver si es doble click
-        esDobleClick = true;
-        timeoutDobleClick = setTimeout(() => {
-          esDobleClick = false;
-          // Si no es doble click, cambiar modo claro
-          if (e.target === titulo) {
-            toggleModoClaro();
-          }
-        }, 300);
-      });
-
-      // Cuando se termina de editar el título
-      titulo.addEventListener("blur", () => {
-        titulo.contentEditable = false;
-        titulo.classList.remove("editando");
-        guardarEstado();
-      });
-
-      titulo.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          titulo.blur();
-        }
-      });
-
-      // Click fuera de botones y título: alternar modo claro
-      document.addEventListener("click", (e) => {
-        const esBoton =
-          e.target.classList.contains("boton") || e.target.closest(".boton");
-        const esTitulo = e.target === titulo || e.target.closest(".titulo");
-
-        if (!esBoton && !esTitulo) {
-          toggleModoClaro();
-        }
-      });
-
-      // Prevenir selección accidental al hacer doble click
-      titulo.addEventListener("dblclick", (e) => {
-        e.preventDefault();
-      });
-
-      // Cargar estado inicial
-      cargarEstado();
+      document.addEventListener("DOMContentLoaded", init);
     </script>
   </body>
 </html>
