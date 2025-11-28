@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>📁 Explorador GitHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .file-icon::before {
+        content: "📄";
+      }
+      .folder-icon::before {
+        content: "📁";
+      }
+      .back-icon::before {
+        content: "⬅️";
+      }
+      .loading-icon::before {
+        content: "⏳";
+      }
+      .error-icon::before {
+        content: "⚠️";
+      }
+      .github-icon::before {
+        content: "🐙";
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+      <header class="mb-8 text-center">
+        <h1
+          class="text-3xl md:text-4xl font-bold text-gray-800 flex items-center justify-center gap-3"
+        >
+          <span class="github-icon text-2xl"></span>
+          Explorador de Archivos
+        </h1>
+        <p class="text-gray-600 mt-2">
+          <a
+            href="https://github.com/caceresaguirrezabal-hub"
+            class="text-blue-600 hover:underline font-medium"
+            target="_blank"
+            >caceresaguirrezabal-hub</a
+          >
+        </p>
+        <div class="mt-4">
+          <span class="font-bold text-gray-700">Ruta:</span>
+          <code id="current-path" class="ml-2 bg-gray-200 px-3 py-1 rounded"
+            >/</code
+          >
+        </div>
+      </header>
+
+      <main>
+        <div id="loading" class="text-center py-6 hidden">
+          <div class="text-3xl loading-icon inline-block mr-2"></div>
+          Cargando...
+        </div>
+
+        <div
+          id="error"
+          class="hidden bg-red-50 text-red-700 p-4 rounded-lg mb-4"
+        >
+          <span class="error-icon"></span>
+          <span id="error-message">Error.</span>
+        </div>
+
+        <div
+          id="content"
+          class="bg-white shadow rounded-lg overflow-hidden hidden"
+        >
+          <ul id="file-list" class="divide-y divide-gray-100"></ul>
+        </div>
+
+        <div id="empty" class="text-center py-10 text-gray-500 hidden">
+          📭 Directorio vacío.
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // ✅ Configuración simple: SIN interpolación de plantillas
+      var USER = "caceresaguirrezabal-hub";
+      var REPO = "caceresaguirrezabal-hub.github.io";
+      // No usamos BRANCH explícitamente → GitHub usa la rama por defecto
+
+      var API_BASE =
+        "https://api.github.com/repos/" + USER + "/" + REPO + "/contents";
+
+      var loadingEl = document.getElementById("loading");
+      var errorEl = document.getElementById("error");
+      var errorMessageEl = document.getElementById("error-message");
+      var contentEl = document.getElementById("content");
+      var fileListEl = document.getElementById("file-list");
+      var currentPathEl = document.getElementById("current-path");
+      var emptyEl = document.getElementById("empty");
+
+      var currentPath = "";
+
+      function show(el) {
+        el.classList.remove("hidden");
+      }
+      function hide(el) {
+        el.classList.add("hidden");
+      }
+
+      function setLoading() {
+        hide(errorEl);
+        hide(contentEl);
+        hide(emptyEl);
+        show(loadingEl);
+      }
+
+      function setError(msg) {
+        hide(loadingEl);
+        hide(contentEl);
+        hide(emptyEl);
+        errorMessageEl.textContent = msg;
+        show(errorEl);
+      }
+
+      function setContent() {
+        hide(loadingEl);
+        hide(errorEl);
+        hide(emptyEl);
+        show(contentEl);
+      }
+
+      function setEmpty() {
+        hide(loadingEl);
+        hide(errorEl);
+        hide(contentEl);
+        show(emptyEl);
+      }
+
+      function formatBytes(bytes) {
+        if (!bytes) return "";
+        var k = 1024;
+        var sizes = ["B", "KB", "MB", "GB"];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+      }
+
+      function loadPath(path) {
+        setLoading();
+        currentPathEl.textContent = path === "" ? "/" : "/" + path;
+
+        var url = API_BASE;
+        if (path) {
+          url += "/" + encodeURIComponent(path);
+        }
+
+        fetch(url)
+          .then(function (response) {
+            if (!response.ok) {
+              return response.json().then(function (err) {
+                throw new Error(err.message || "Error " + response.status);
+              });
+            }
+            return response.json();
+          })
+          .then(function (data) {
+            if (!Array.isArray(data)) {
+              // Es un archivo → redirigir
+              if (data.download_url) {
+                window.location.href = data.download_url;
+              } else {
+                window.open(data.html_url, "_blank");
+              }
+              return;
+            }
+
+            if (data.length === 0) {
+              setEmpty();
+              return;
+            }
+
+            fileListEl.innerHTML = "";
+
+            // ".." si no es raíz
+            if (path) {
+              var parentPath = path.split("/").slice(0, -1).join("/");
+              var li = document.createElement("li");
+              li.className = "px-4 py-3 hover:bg-gray-50 cursor-pointer";
+              li.innerHTML =
+                '<div class="flex items-center"><div class="back-icon mr-2"></div><span class="font-medium">..</span></div>';
+              li.onclick = function () {
+                loadPath(parentPath);
+              };
+              fileListEl.appendChild(li);
+            }
+
+            // Ordenar: directorios primero
+            var dirs = data.filter(function (item) {
+              return item.type === "dir";
+            });
+            var files = data.filter(function (item) {
+              return item.type === "file";
+            });
+            var all = dirs.concat(files);
+
+            all.forEach(function (item) {
+              var li = document.createElement("li");
+              li.className =
+                "px-4 py-3 hover:bg-gray-50 cursor-pointer border-t border-gray-100 first:border-t-0";
+
+              var name = item.name;
+              var isDir = item.type === "dir";
+              var sizeText = isDir ? "" : " · " + formatBytes(item.size);
+
+              var iconClass = isDir ? "folder-icon" : "file-icon";
+
+              var linkHtml = "";
+              if (!isDir && item.download_url) {
+                linkHtml =
+                  '<a href="' +
+                  item.download_url +
+                  '" target="_blank" class="text-blue-500 ml-2 text-sm">↗</a>';
+              }
+
+              li.innerHTML =
+                '<div class="flex items-center justify-between">' +
+                '<div class="flex items-center">' +
+                '<div class="' +
+                iconClass +
+                ' mr-2"></div>' +
+                '<span class="font-medium">' +
+                name +
+                "</span>" +
+                '<span class="text-gray-500 text-sm ml-2">' +
+                sizeText +
+                "</span>" +
+                "</div>" +
+                linkHtml +
+                "</div>";
+
+              if (isDir) {
+                li.onclick = function () {
+                  var newPath = path ? path + "/" + item.name : item.name;
+                  loadPath(newPath);
+                };
+              }
+
+              fileListEl.appendChild(li);
+            });
+
+            setContent();
+          })
+          .catch(function (err) {
+            console.error("Fetch error:", err);
+            setError(
+              "❌ " +
+                (err.message ||
+                  "No se pudo cargar. ¿El repositorio es público?")
+            );
+          });
+      }
+
+      // Iniciar
+      document.addEventListener("DOMContentLoaded", function () {
+        loadPath("");
+      });
+    </script>
+  </body>
+</html>
