@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agustín Cáceres's Github</title>
+    <title>GitHub Pages Explorer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
@@ -32,6 +32,12 @@
         transition: opacity 0.2s;
       }
     </style>
+    <!-- Favicon placeholder (will be replaced by script) -->
+    <link
+      id="dynamic-favicon"
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📁</text></svg>"
+    />
   </head>
   <body class="bg-gray-900 text-gray-200">
     <div class="max-w-4xl mx-auto px-4 py-6">
@@ -76,12 +82,34 @@
       </main>
 
       <footer class="mt-8 text-gray-500 text-xs">
-        Agustín Cáceres Aguirrezabal
+        Copy GH Pages URLs to share live pages. Repo must be public.
       </footer>
     </div>
 
     <script>
-      // GitHub Pages base URL (your live site)
+      // === FAVICON GENERATOR (📁) ===
+      (function () {
+        // Si el navegador no soporta canvas, usa fallback SVG
+        try {
+          var canvas = document.createElement("canvas");
+          canvas.width = 32;
+          canvas.height = 32;
+          var ctx = canvas.getContext("2d");
+          ctx.font = "28px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#4b5563";
+          ctx.fillText("📁", 16, 16);
+          var favicon = document.getElementById("dynamic-favicon");
+          if (favicon) {
+            favicon.href = canvas.toDataURL("image/png");
+          }
+        } catch (e) {
+          // Fallback: SVG con 📁 (ya está en el <link> por defecto)
+        }
+      })();
+
+      // === APP CONFIG ===
       var GH_PAGES_BASE = "https://caceresaguirrezabal-hub.github.io";
       var USER = "caceresaguirrezabal-hub";
       var REPO = "caceresaguirrezabal-hub.github.io";
@@ -142,7 +170,6 @@
         return Math.round(bytes * 10) / 10 + " " + units[i];
       }
 
-      // Copy to clipboard with feedback
       function copyToClipboard(text, button) {
         if (!navigator.clipboard) {
           alert("Clipboard API not supported");
@@ -151,7 +178,6 @@
         navigator.clipboard
           .writeText(text)
           .then(function () {
-            // Show feedback
             var feedback = document.createElement("span");
             feedback.className = "copy-feedback ml-2";
             feedback.textContent = "✓ Copied!";
@@ -170,7 +196,6 @@
           });
       }
 
-      // Load directory
       function loadDirectory(path) {
         setLoading();
         elCurrentPath.textContent = path === "" ? "/" : "/" + path;
@@ -204,7 +229,6 @@
 
             elFileList.innerHTML = "";
 
-            // Parent directory
             if (path) {
               var parentPath = path.split("/").slice(0, -1).join("/");
               var li = document.createElement("li");
@@ -221,7 +245,6 @@
               elFileList.appendChild(li);
             }
 
-            // Sort: dirs first
             var dirs = data.filter(function (i) {
               return i.type === "dir";
             });
@@ -241,7 +264,6 @@
 
               var actions = "";
               if (!isDir && item.path) {
-                // GH Pages URL: https://user.github.io/repo/path → but for GH Pages repo, it's just /path
                 var ghPagesUrl = GH_PAGES_BASE + "/" + item.path;
 
                 actions +=
