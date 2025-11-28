@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pomodoro Timer</title>
+    <style>
+      @font-face {
+        font-family: "Lyon-Text";
+        src: url("https://fonts.cdnfonts.com/s/14637/LyonText-Regular.woff")
+          format("woff");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho",
+          "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC",
+          "Songti SC", SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
+        background: transparent;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 1rem;
+        transition: color 0.3s ease;
+      }
+
+      .timer-container {
+        text-align: center;
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .time-display {
+        font-size: clamp(2rem, 8vw, 4rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        margin: 1.5rem 0;
+        line-height: 1.2;
+        font-feature-settings: "tnum";
+        transition: opacity 0.2s ease;
+      }
+
+      .time-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .time-input {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .time-input input {
+        width: 60px;
+        padding: 0.5rem;
+        font-family: inherit;
+        font-size: 1rem;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+
+      .time-input input:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .time-input label {
+        font-size: 0.875rem;
+        opacity: 0.8;
+      }
+
+      button {
+        padding: 0.75rem 1.25rem;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 500;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(4px);
+      }
+
+      button:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-1px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .flash {
+        animation: flash 0.5s 3 alternate;
+      }
+
+      @keyframes flash {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.2;
+        }
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 480px) {
+        .time-input {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .time-input div {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin: 0.25rem 0;
+        }
+
+        .time-input label {
+          margin-bottom: 0.25rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="timer-container">
+      <div class="time-display" id="display">25:00:00</div>
+
+      <div class="time-input">
+        <div>
+          <input type="number" id="hours" min="0" max="99" value="0" />
+          <label>Horas</label>
+        </div>
+        <div>
+          <input type="number" id="minutes" min="0" max="59" value="25" />
+          <label>Minutos</label>
+        </div>
+        <div>
+          <input type="number" id="seconds" min="0" max="59" value="0" />
+          <label>Segundos</label>
+        </div>
+      </div>
+
+      <div class="time-controls">
+        <button id="start">Iniciar</button>
+        <button id="pause" disabled>Detener</button>
+        <button id="reset">Reiniciar</button>
+      </div>
+    </div>
+
+    <script>
+      // Timer state
+      let totalSeconds = 25 * 60;
+      let countdownInterval = null;
+      let isRunning = false;
+      let alarmSound = null;
+
+      // DOM elements
+      const display = document.getElementById("display");
+      const startBtn = document.getElementById("start");
+      const pauseBtn = document.getElementById("pause");
+      const resetBtn = document.getElementById("reset");
+      const hoursInput = document.getElementById("hours");
+      const minutesInput = document.getElementById("minutes");
+      const secondsInput = document.getElementById("seconds");
+
+      // Initialize alarm sound (1kHz sine wave for 1 second)
+      function createAlarmSound() {
+        try {
+          const context = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const oscillator = context.createOscillator();
+          const gainNode = context.createGain();
+
+          oscillator.type = "sine";
+          oscillator.frequency.value = 1000;
+          gainNode.gain.value = 0.3;
+
+          oscillator.connect(gainNode);
+          gainNode.connect(context.destination);
+
+          oscillator.start();
+          oscillator.stop(context.currentTime + 1);
+
+          return { oscillator, context };
+        } catch (e) {
+          console.warn("Audio not supported or blocked:", e);
+          return null;
+        }
+      }
+
+      // Format time as HH:MM:SS
+      function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h.toString().padStart(2, "0")}:${m
+          .toString()
+          .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+      }
+
+      // Update display
+      function updateDisplay() {
+        display.textContent = formatTime(totalSeconds);
+      }
+
+      // Start timer
+      function startTimer() {
+        if (isRunning) return;
+
+        isRunning = true;
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+
+        countdownInterval = setInterval(() => {
+          if (totalSeconds <= 0) {
+            clearInterval(countdownInterval);
+            alarm();
+            return;
+          }
+
+          totalSeconds--;
+          updateDisplay();
+        }, 1000);
+      }
+
+      // Pause timer
+      function pauseTimer() {
+        if (!isRunning) return;
+
+        isRunning = false;
+        clearInterval(countdownInterval);
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+      }
+
+      // Reset timer
+      function resetTimer() {
+        pauseTimer();
+        totalSeconds =
+          parseInt(hoursInput.value || 0) * 3600 +
+          parseInt(minutesInput.value || 0) * 60 +
+          parseInt(secondsInput.value || 0);
+        if (totalSeconds <= 0) totalSeconds = 25 * 60;
+        updateDisplay();
+      }
+
+      // Alarm function
+      function alarm() {
+        // Flash animation
+        display.classList.add("flash");
+        setTimeout(() => display.classList.remove("flash"), 1800);
+
+        // Play sound
+        if (alarmSound) {
+          try {
+            const { oscillator, context } = createAlarmSound();
+            setTimeout(() => {
+              if (context.state === "running") {
+                context.close().catch(() => {});
+              }
+            }, 1100);
+          } catch (e) {
+            console.warn("Failed to play alarm:", e);
+          }
+        }
+
+        // Update UI
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+      }
+
+      // Event listeners for buttons
+      startBtn.addEventListener("click", startTimer);
+      pauseBtn.addEventListener("click", pauseTimer);
+      resetBtn.addEventListener("click", resetTimer);
+
+      // Update timer when inputs change
+      [hoursInput, minutesInput, secondsInput].forEach((input) => {
+        input.addEventListener("change", resetTimer);
+        input.addEventListener("input", () => {
+          // Clamp values
+          let value = parseInt(input.value) || 0;
+          if (input === hoursInput) value = Math.max(0, Math.min(99, value));
+          else value = Math.max(0, Math.min(59, value));
+          input.value = value;
+        });
+      });
+
+      // Color toggle on body click (except buttons)
+      document.addEventListener("click", (e) => {
+        if (
+          e.target.tagName !== "BUTTON" &&
+          !e.target.closest(".time-input") &&
+          e.target !== display
+        ) {
+          document.body.style.color =
+            document.body.style.color === "rgb(44, 44, 43)"
+              ? "#ffffff"
+              : "#2c2c2b";
+        }
+      });
+
+      // Initialize display
+      updateDisplay();
+    </script>
+  </body>
+</html>
