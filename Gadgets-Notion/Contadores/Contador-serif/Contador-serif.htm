@@ -42,7 +42,7 @@
         font-size: clamp(2.5rem, 8vw, 5rem);
         font-weight: 600;
         margin-bottom: clamp(1rem, 4vh, 3rem);
-        color: #2c2c2b;
+        color: #ffffff;
         cursor: pointer;
         user-select: none;
         line-height: 1.3;
@@ -54,11 +54,11 @@
       }
 
       .titulo:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(0, 0, 0, 0.1);
       }
 
       .titulo.editando {
-        background-color: rgba(255, 255, 255, 0.2);
+        background-color: rgba(0, 0, 0, 0.2);
         outline: none;
       }
 
@@ -66,7 +66,7 @@
         font-size: clamp(4rem, 12vw, 8rem);
         font-weight: 700;
         margin: clamp(1rem, 3vh, 2rem) 0;
-        color: #2c2c2b;
+        color: #ffffff;
         line-height: 1.1;
         min-height: 1.1em;
       }
@@ -85,7 +85,7 @@
         font-weight: 700;
         border: none;
         background: transparent;
-        color: #2c2c2b;
+        color: #ffffff;
         cursor: pointer;
         border-radius: 12px;
         transition: all 0.2s ease;
@@ -96,7 +96,7 @@
       }
 
       .boton:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(0, 0, 0, 0.1);
         transform: translateY(-4px);
       }
 
@@ -114,6 +114,7 @@
         font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho",
           "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC",
           "Songti SC", SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
+        color: #ffffff;
       }
 
       @media (max-width: 480px) {
@@ -184,7 +185,7 @@
 
       // Estado
       let contador = 0;
-      let modoOscuro = false; // false = modo claro (#2c2c2b), true = modo oscuro (#ffffff)
+      let modoClaro = false; // false = modo oscuro (#ffffff), true = modo claro (#2c2c2b)
       let esDobleClick = false;
       let timeoutDobleClick = null;
 
@@ -193,10 +194,10 @@
         valor.textContent = contador;
       }
 
-      // Cambiar modo de color: alterna entre #2c2c2b (por defecto) y #ffffff
-      function toggleModoOscuro() {
-        modoOscuro = !modoOscuro;
-        const color = modoOscuro ? "#ffffff" : "#2c2c2b";
+      // Cambiar modo de color: alterna entre #ffffff (por defecto) y #2c2c2b
+      function toggleModoClaro() {
+        modoClaro = !modoClaro;
+        const color = modoClaro ? "#2c2c2b" : "#ffffff";
         document
           .querySelectorAll(".titulo, .contador, .boton")
           .forEach((el) => {
@@ -236,9 +237,9 @@
         esDobleClick = true;
         timeoutDobleClick = setTimeout(() => {
           esDobleClick = false;
-          // Si no es doble click, cambiar modo oscuro
+          // Si no es doble click, cambiar modo claro
           if (e.target === titulo) {
-            toggleModoOscuro();
+            toggleModoClaro();
           }
         }, 300);
       });
@@ -256,14 +257,14 @@
         }
       });
 
-      // Click fuera de botones y título: alternar modo oscuro
+      // Click fuera de botones y título: alternar modo claro
       document.addEventListener("click", (e) => {
         const esBoton =
           e.target.classList.contains("boton") || e.target.closest(".boton");
         const esTitulo = e.target === titulo || e.target.closest(".titulo");
 
         if (!esBoton && !esTitulo) {
-          toggleModoOscuro();
+          toggleModoClaro();
         }
       });
 
