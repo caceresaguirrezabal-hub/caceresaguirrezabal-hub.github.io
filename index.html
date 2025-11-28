@@ -1,269 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GitHub File Explorer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      body {
-        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-          "Liberation Mono", monospace;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub Pages File Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .icon-file::before   { content: "[FILE] "; font-weight: bold; color: #60a5fa; }
+    .icon-folder::before { content: "[DIR]  "; font-weight: bold; color: #93c5fd; }
+    .icon-back::before   { content: "[..]   "; font-weight: bold; color: #cbd5e1; }
+    .copy-feedback { font-size: 0.75rem; color: #34d399; opacity: 0; transition: opacity 0.2s; }
+  </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+  <div class="max-w-4xl mx-auto px-4 py-6">
+    <header class="mb-6">
+      <h1 class="text-xl font-bold">GitHub Pages Explorer</h1>
+      <p class="text-gray-400 mt-1">
+        Serving from: <code class="bg-gray-800 px-2 py-1 rounded">https://caceresaguirrezabal-hub.github.io</code>
+      </p>
+      <div class="mt-2">
+        <strong>Path:</strong>
+        <code id="current-path" class="ml-2 bg-gray-800 px-2 py-1 rounded">/</code>
+      </div>
+    </header>
+
+    <main>
+      <div id="loading" class="hidden py-3 text-gray-400">
+        Loading directory contents...
+      </div>
+
+      <div id="error" class="hidden bg-red-900/30 border-l-4 border-red-500 p-3 mb-4">
+        <strong>Error:</strong> <span id="error-message">Unknown error.</span>
+      </div>
+
+      <div id="empty" class="hidden py-4 text-gray-500">
+        [Empty directory]
+      </div>
+
+      <div id="content" class="hidden bg-gray-800 rounded border border-gray-700 overflow-hidden">
+        <ul id="file-list" class="divide-y divide-gray-700"></ul>
+      </div>
+    </main>
+
+    <footer class="mt-8 text-gray-500 text-xs">
+      Copy GH Pages URLs to share live pages. Repo must be public.
+    </footer>
+  </div>
+
+  <script>
+    // GitHub Pages base URL (your live site)
+    var GH_PAGES_BASE = "https://caceresaguirrezabal-hub.github.io";
+    var USER = "caceresaguirrezabal-hub";
+    var REPO = "caceresaguirrezabal-hub.github.io";
+    var API_URL = "https://api.github.com/repos/" + USER + "/" + REPO + "/contents";
+
+    // DOM
+    var elLoading = document.getElementById("loading");
+    var elError = document.getElementById("error");
+    var elErrorMessage = document.getElementById("error-message");
+    var elEmpty = document.getElementById("empty");
+    var elContent = document.getElementById("content");
+    var elFileList = document.getElementById("file-list");
+    var elCurrentPath = document.getElementById("current-path");
+
+    // Helpers
+    function show(el) { el.classList.remove("hidden"); }
+    function hide(el) { el.classList.add("hidden"); }
+
+    function setLoading() { hide(elError); hide(elEmpty); hide(elContent); show(elLoading); }
+    function setError(msg) { hide(elLoading); hide(elEmpty); hide(elContent); elErrorMessage.textContent = msg; show(elError); }
+    function setEmpty() { hide(elLoading); hide(elError); hide(elContent); show(elEmpty); }
+    function setContent() { hide(elLoading); hide(elError); hide(elEmpty); show(elContent); }
+
+    function formatSize(bytes) {
+      if (!bytes) return "";
+      var units = ["B", "KB", "MB", "GB"];
+      var i = 0;
+      while (bytes >= 1024 && i < units.length - 1) {
+        bytes /= 1024;
+        i++;
       }
-      .icon-file::before {
-        content: "[FILE] ";
-        font-weight: bold;
-        color: #4b5563;
+      return Math.round(bytes * 10) / 10 + " " + units[i];
+    }
+
+    // Copy to clipboard with feedback
+    function copyToClipboard(text, button) {
+      if (!navigator.clipboard) {
+        alert("Clipboard API not supported");
+        return;
       }
-      .icon-folder::before {
-        content: "[DIR]  ";
-        font-weight: bold;
-        color: #1d4ed8;
-      }
-      .icon-back::before {
-        content: "[..]   ";
-        font-weight: bold;
-        color: #6b7280;
-      }
-    </style>
-  </head>
-  <body class="bg-gray-900 text-gray-200">
-    <div class="max-w-4xl mx-auto px-4 py-6">
-      <header class="mb-6">
-        <h1 class="text-xl font-bold">GitHub File Explorer</h1>
-        <p class="text-gray-400 mt-1">
-          Repository:
-          <a
-            href="https://github.com/caceresaguirrezabal-hub/caceresaguirrezabal-hub.github.io"
-            class="text-blue-400 underline hover:text-blue-300"
-            target="_blank"
-          >
-            caceresaguirrezabal-hub/caceresaguirrezabal-hub.github.io
-          </a>
-        </p>
-        <div class="mt-2">
-          <strong>Path:</strong>
-          <code id="current-path" class="ml-2 bg-gray-800 px-2 py-1 rounded"
-            >/</code
-          >
-        </div>
-      </header>
+      navigator.clipboard.writeText(text).then(function() {
+        // Show feedback
+        var feedback = document.createElement("span");
+        feedback.className = "copy-feedback ml-2";
+        feedback.textContent = "✓ Copied!";
+        button.parentNode.appendChild(feedback);
+        feedback.style.opacity = "1";
 
-      <main>
-        <div id="loading" class="hidden py-3 text-gray-400">
-          Loading directory contents...
-        </div>
-
-        <div
-          id="error"
-          class="hidden bg-red-900/30 border-l-4 border-red-500 p-3 mb-4"
-        >
-          <strong>Error:</strong> <span id="error-message">Unknown error.</span>
-        </div>
-
-        <div id="empty" class="hidden py-4 text-gray-500">
-          [Empty directory]
-        </div>
-
-        <div
-          id="content"
-          class="hidden bg-gray-800 rounded border border-gray-700 overflow-hidden"
-        >
-          <ul id="file-list" class="divide-y divide-gray-700"></ul>
-        </div>
-      </main>
-
-      <footer class="mt-8 text-gray-500 text-xs">
-        Uses GitHub REST API. Repository must be public.
-      </footer>
-    </div>
-
-    <script>
-      // Configuration
-      var USER = "caceresaguirrezabal-hub";
-      var REPO = "caceresaguirrezabal-hub.github.io";
-      var API_URL =
-        "https://api.github.com/repos/" + USER + "/" + REPO + "/contents";
-
-      // DOM
-      var elLoading = document.getElementById("loading");
-      var elError = document.getElementById("error");
-      var elErrorMessage = document.getElementById("error-message");
-      var elEmpty = document.getElementById("empty");
-      var elContent = document.getElementById("content");
-      var elFileList = document.getElementById("file-list");
-      var elCurrentPath = document.getElementById("current-path");
-
-      // Helpers
-      function show(el) {
-        el.classList.remove("hidden");
-      }
-      function hide(el) {
-        el.classList.add("hidden");
-      }
-
-      function setLoading() {
-        hide(elError);
-        hide(elEmpty);
-        hide(elContent);
-        show(elLoading);
-      }
-      function setError(msg) {
-        hide(elLoading);
-        hide(elEmpty);
-        hide(elContent);
-        elErrorMessage.textContent = msg;
-        show(elError);
-      }
-      function setEmpty() {
-        hide(elLoading);
-        hide(elError);
-        hide(elContent);
-        show(elEmpty);
-      }
-      function setContent() {
-        hide(elLoading);
-        hide(elError);
-        hide(elEmpty);
-        show(elContent);
-      }
-
-      function formatSize(bytes) {
-        if (!bytes) return "";
-        var units = ["B", "KB", "MB", "GB"];
-        var i = 0;
-        while (bytes >= 1024 && i < units.length - 1) {
-          bytes /= 1024;
-          i++;
-        }
-        return Math.round(bytes * 10) / 10 + " " + units[i];
-      }
-
-      // Load directory
-      function loadDirectory(path) {
-        setLoading();
-        elCurrentPath.textContent = path === "" ? "/" : "/" + path;
-
-        var url = API_URL;
-        if (path) {
-          url += "/" + encodeURIComponent(path);
-        }
-
-        fetch(url)
-          .then(function (response) {
-            if (!response.ok) {
-              return response.json().then(function (err) {
-                throw new Error(err.message || "HTTP " + response.status);
-              });
-            }
-            return response.json();
-          })
-          .then(function (data) {
-            if (!Array.isArray(data)) {
-              if (data.download_url) {
-                window.open(data.download_url, "_blank");
-              }
-              return;
-            }
-
-            if (data.length === 0) {
-              setEmpty();
-              return;
-            }
-
-            elFileList.innerHTML = "";
-
-            // Parent directory
-            if (path) {
-              var parentPath = path.split("/").slice(0, -1).join("/");
-              var li = document.createElement("li");
-              li.className = "px-3 py-2 hover:bg-gray-700 cursor-pointer";
-              li.innerHTML =
-                '<div class="flex items-center justify-between">' +
-                '<span class="icon-back"></span>' +
-                "<span>Parent directory</span>" +
-                "<span></span>" +
-                "</div>";
-              li.onclick = function () {
-                loadDirectory(parentPath);
-              };
-              elFileList.appendChild(li);
-            }
-
-            // Sort: dirs first
-            var dirs = data.filter(function (i) {
-              return i.type === "dir";
-            });
-            var files = data.filter(function (i) {
-              return i.type === "file";
-            });
-            var items = dirs.concat(files);
-
-            items.forEach(function (item) {
-              var li = document.createElement("li");
-              li.className =
-                "px-3 py-2 hover:bg-gray-700 cursor-pointer border-t border-gray-700 first:border-t-0";
-
-              var isDir = item.type === "dir";
-              var sizeText = isDir ? "" : " (" + formatSize(item.size) + ")";
-              var iconClass = isDir ? "icon-folder" : "icon-file";
-
-              var actions = "";
-              if (!isDir && item.download_url) {
-                actions +=
-                  "<button onclick=\"window.open('" +
-                  item.download_url +
-                  "', '_blank'); event.stopPropagation();\" " +
-                  'class="text-blue-400 hover:text-blue-300 text-xs mr-3">[View]</button>' +
-                  '<a href="' +
-                  item.download_url +
-                  '" download="' +
-                  item.name +
-                  '" ' +
-                  'class="text-green-400 hover:text-green-300 text-xs">[Download]</a>';
-              }
-
-              li.innerHTML =
-                '<div class="flex items-center justify-between">' +
-                "<div>" +
-                '<span class="' +
-                iconClass +
-                '"></span>' +
-                "<span>" +
-                item.name +
-                "</span>" +
-                '<span class="text-gray-500 ml-2">' +
-                sizeText +
-                "</span>" +
-                "</div>" +
-                "<div>" +
-                actions +
-                "</div>" +
-                "</div>";
-
-              if (isDir) {
-                li.onclick = function () {
-                  var newPath = path ? path + "/" + item.name : item.name;
-                  loadDirectory(newPath);
-                };
-              }
-
-              elFileList.appendChild(li);
-            });
-
-            setContent();
-          })
-          .catch(function (err) {
-            console.error("Error:", err);
-            setError(
-              "Failed to load: " + (err.message || "repo must be public")
-            );
-          });
-      }
-
-      document.addEventListener("DOMContentLoaded", function () {
-        loadDirectory("");
+        setTimeout(function() {
+          feedback.style.opacity = "0";
+          setTimeout(function() { feedback.remove(); }, 200);
+        }, 1500);
+      }).catch(function(err) {
+        console.error("Copy failed:", err);
       });
-    </script>
-  </body>
+    }
+
+    // Load directory
+    function loadDirectory(path) {
+      setLoading();
+      elCurrentPath.textContent = path === "" ? "/" : "/" + path;
+
+      var url = API_URL;
+      if (path) {
+        url += "/" + encodeURIComponent(path);
+      }
+
+      fetch(url)
+        .then(function(response) {
+          if (!response.ok) {
+            return response.json().then(function(err) {
+              throw new Error(err.message || "HTTP " + response.status);
+            });
+          }
+          return response.json();
+        })
+        .then(function(data) {
+          if (!Array.isArray(data)) {
+            if (data.download_url) {
+              window.open(data.download_url, "_blank");
+            }
+            return;
+          }
+
+          if (data.length === 0) {
+            setEmpty();
+            return;
+          }
+
+          elFileList.innerHTML = "";
+
+          // Parent directory
+          if (path) {
+            var parentPath = path.split("/").slice(0, -1).join("/");
+            var li = document.createElement("li");
+            li.className = "px-3 py-2 hover:bg-gray-700 cursor-pointer";
+            li.innerHTML =
+              '<div class="flex items-center justify-between">' +
+                '<span class="icon-back"></span>' +
+                '<span>Parent directory</span>' +
+                '<span></span>' +
+              '</div>';
+            li.onclick = function() { loadDirectory(parentPath); };
+            elFileList.appendChild(li);
+          }
+
+          // Sort: dirs first
+          var dirs = data.filter(function(i) { return i.type === "dir"; });
+          var files = data.filter(function(i) { return i.type === "file"; });
+          var items = dirs.concat(files);
+
+          items.forEach(function(item) {
+            var li = document.createElement("li");
+            li.className = "px-3 py-2 hover:bg-gray-700 cursor-pointer border-t border-gray-700 first:border-t-0";
+
+            var isDir = item.type === "dir";
+            var sizeText = isDir ? "" : " (" + formatSize(item.size) + ")";
+            var iconClass = isDir ? "icon-folder" : "icon-file";
+
+            var actions = "";
+            if (!isDir && item.path) {
+              // GH Pages URL: https://user.github.io/repo/path → but for GH Pages repo, it's just /path
+              var ghPagesUrl = GH_PAGES_BASE + "/" + item.path;
+              
+              actions +=
+                '<button onclick="window.open(\'' + ghPagesUrl + '\', \'_blank\'); event.stopPropagation();" ' +
+                'class="text-blue-400 hover:text-blue-300 text-xs mr-2">[View]</button>' +
+                
+                '<a href="' + ghPagesUrl + '" download="' + item.name + '" ' +
+                'class="text-green-400 hover:text-green-300 text-xs mr-2">[Download]</a>' +
+                
+                '<button onclick="copyToClipboard(\'' + ghPagesUrl + '\', this); event.stopPropagation();" ' +
+                'class="text-yellow-400 hover:text-yellow-300 text-xs">[Copy GH Pages URL]</button>';
+            }
+
+            li.innerHTML =
+              '<div class="flex items-center justify-between">' +
+                '<div>' +
+                  '<span class="' + iconClass + '"></span>' +
+                  '<span>' + item.name + '</span>' +
+                  '<span class="text-gray-500 ml-2">' + sizeText + '</span>' +
+                '</div>' +
+                '<div>' + actions + '</div>' +
+              '</div>';
+
+            if (isDir) {
+              li.onclick = function() {
+                var newPath = path ? path + "/" + item.name : item.name;
+                loadDirectory(newPath);
+              };
+            }
+
+            elFileList.appendChild(li);
+          });
+
+          setContent();
+        })
+        .catch(function(err) {
+          console.error("Error:", err);
+          setError("Failed to load: " + (err.message || "repo must be public"));
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      loadDirectory("");
+    });
+  </script>
+</body>
 </html>
+
