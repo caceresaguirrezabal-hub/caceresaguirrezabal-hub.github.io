@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contador Personalizable</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Lyon-Text:wght@400;500;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho",
+          "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC",
+          "Songti SC", SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
+        background: transparent;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        width: 100%;
+        height: 100%;
+      }
+
+      .contador-container {
+        text-align: center;
+        width: 95%;
+        max-width: 100%;
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .titulo {
+        font-size: clamp(2.5rem, 8vw, 5rem);
+        font-weight: 600;
+        margin-bottom: clamp(1rem, 4vh, 3rem);
+        color: #2c2c2b;
+        cursor: pointer;
+        user-select: none;
+        line-height: 1.3;
+        padding: clamp(0.5rem, 2vw, 1.5rem) clamp(1rem, 3vw, 2rem);
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+        word-break: break-word;
+        max-width: 100%;
+      }
+
+      .titulo:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .titulo.editando {
+        background-color: rgba(255, 255, 255, 0.2);
+        outline: none;
+      }
+
+      .contador {
+        font-size: clamp(4rem, 12vw, 8rem);
+        font-weight: 700;
+        margin: clamp(1rem, 3vh, 2rem) 0;
+        color: #2c2c2b;
+        line-height: 1.1;
+        min-height: 1.1em;
+      }
+
+      .botones {
+        display: flex;
+        justify-content: center;
+        gap: clamp(0.5rem, 2vw, 1.5rem);
+        margin-bottom: clamp(1rem, 3vh, 2rem);
+      }
+
+      .boton {
+        width: clamp(60px, 15vw, 100px);
+        height: clamp(60px, 15vw, 100px);
+        font-size: clamp(2rem, 6vw, 4rem);
+        font-weight: 700;
+        border: none;
+        background: transparent;
+        color: #2c2c2b;
+        cursor: pointer;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+      }
+
+      .boton:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-4px);
+      }
+
+      .boton:active {
+        transform: translateY(0);
+      }
+
+      .boton-reset {
+        width: clamp(120px, 40vw, 250px);
+        height: clamp(50px, 8vh, 80px);
+        font-size: clamp(1.2rem, 4vw, 2.5rem);
+        font-weight: 600;
+        margin-top: clamp(1rem, 3vh, 2rem);
+        border-radius: 10px;
+        font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho",
+          "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC",
+          "Songti SC", SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
+      }
+
+      @media (max-width: 480px) {
+        .contador-container {
+          height: 85vh;
+        }
+
+        .titulo {
+          font-size: clamp(2rem, 10vw, 3.5rem);
+          padding: clamp(0.5rem, 2vw, 1rem) clamp(0.8rem, 2.5vw, 1.5rem);
+        }
+
+        .contador {
+          font-size: clamp(3rem, 10vw, 6rem);
+        }
+
+        .boton {
+          width: clamp(50px, 18vw, 80px);
+          height: clamp(50px, 18vw, 80px);
+          font-size: clamp(1.8rem, 7vw, 3rem);
+        }
+
+        .boton-reset {
+          width: clamp(100px, 50vw, 200px);
+          height: clamp(45px, 7vh, 70px);
+          font-size: clamp(1rem, 4.5vw, 2rem);
+        }
+      }
+
+      @media (max-height: 500px) {
+        .contador-container {
+          height: 80vh;
+        }
+
+        .titulo {
+          margin-bottom: clamp(0.5rem, 2vh, 1.5rem);
+        }
+
+        .contador {
+          margin: clamp(0.5rem, 2vh, 1rem) 0;
+        }
+
+        .botones {
+          gap: clamp(0.3rem, 1.5vw, 1rem);
+          margin-bottom: clamp(0.5rem, 2vh, 1rem);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contador-container">
+      <div class="titulo" id="titulo" contenteditable="false">Contador</div>
+      <div class="contador" id="valor">0</div>
+      <div class="botones">
+        <button class="boton" id="restar">−</button>
+        <button class="boton" id="sumar">+</button>
+      </div>
+      <button class="boton boton-reset" id="reset">Reset</button>
+    </div>
+
+    <script>
+      // Elementos
+      const titulo = document.getElementById("titulo");
+      const valor = document.getElementById("valor");
+      const sumarBtn = document.getElementById("sumar");
+      const restarBtn = document.getElementById("restar");
+      const resetBtn = document.getElementById("reset");
+
+      // Estado
+      let contador = 0;
+      let modoOscuro = false; // false = modo claro (#2c2c2b), true = modo oscuro (#ffffff)
+      let esDobleClick = false;
+      let timeoutDobleClick = null;
+
+      // Actualizar valor
+      function actualizarValor() {
+        valor.textContent = contador;
+      }
+
+      // Cambiar modo de color: alterna entre #2c2c2b (por defecto) y #ffffff
+      function toggleModoOscuro() {
+        modoOscuro = !modoOscuro;
+        const color = modoOscuro ? "#ffffff" : "#2c2c2b";
+        document
+          .querySelectorAll(".titulo, .contador, .boton")
+          .forEach((el) => {
+            el.style.color = color;
+          });
+      }
+
+      // Eventos de botones
+      sumarBtn.addEventListener("click", () => {
+        contador++;
+        actualizarValor();
+      });
+
+      restarBtn.addEventListener("click", () => {
+        contador--;
+        actualizarValor();
+      });
+
+      resetBtn.addEventListener("click", () => {
+        contador = 0;
+        actualizarValor();
+      });
+
+      // Doble click en título para editar
+      titulo.addEventListener("click", (e) => {
+        if (esDobleClick) {
+          // Segundo click: activar edición
+          clearTimeout(timeoutDobleClick);
+          titulo.contentEditable = true;
+          titulo.classList.add("editando");
+          titulo.focus();
+          esDobleClick = false;
+          return;
+        }
+
+        // Primer click: esperar para ver si es doble click
+        esDobleClick = true;
+        timeoutDobleClick = setTimeout(() => {
+          esDobleClick = false;
+          // Si no es doble click, cambiar modo oscuro
+          if (e.target === titulo) {
+            toggleModoOscuro();
+          }
+        }, 300);
+      });
+
+      // Cuando se termina de editar el título
+      titulo.addEventListener("blur", () => {
+        titulo.contentEditable = false;
+        titulo.classList.remove("editando");
+      });
+
+      titulo.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          titulo.blur();
+        }
+      });
+
+      // Click fuera de botones y título: alternar modo oscuro
+      document.addEventListener("click", (e) => {
+        const esBoton =
+          e.target.classList.contains("boton") || e.target.closest(".boton");
+        const esTitulo = e.target === titulo || e.target.closest(".titulo");
+
+        if (!esBoton && !esTitulo) {
+          toggleModoOscuro();
+        }
+      });
+
+      // Prevenir selección accidental al hacer doble click
+      titulo.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+      });
+    </script>
+  </body>
+</html>
