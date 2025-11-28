@@ -189,14 +189,63 @@
       let esDobleClick = false;
       let timeoutDobleClick = null;
 
+      // Función para obtener parámetros de la URL
+      function getURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        const count = params.get("count");
+        const title = params.get("title");
+        const dark = params.get("dark");
+
+        return {
+          count: count !== null ? parseInt(count) : 0,
+          title: title || "Contador",
+          dark: dark !== null ? dark === "true" : true, // true = modo oscuro (blanco), false = modo claro (negro)
+        };
+      }
+
+      // Función para actualizar la URL
+      function updateURL(count, title, isDark) {
+        const baseUrl = window.location.pathname;
+        const params = new URLSearchParams();
+        if (count !== 0) params.set("count", count);
+        if (title !== "Contador") params.set("title", title);
+        if (!isDark) params.set("dark", "false");
+
+        const newUrl =
+          baseUrl + (params.toString() ? "?" + params.toString() : "");
+
+        // Usar history.replaceState para no crear entradas en el historial
+        try {
+          window.history.replaceState({}, "", newUrl);
+        } catch (e) {
+          // Ignorar errores en entornos restringidos (como algunos iframes)
+        }
+      }
+
+      // Cargar estado desde URL
+      function cargarEstado() {
+        const params = getURLParams();
+        contador = params.count;
+        titulo.textContent = params.title;
+        modoClaro = !params.dark; // dark=true significa modo oscuro (blanco), así que modoClaro = false
+
+        actualizarValor();
+        actualizarColores();
+      }
+
+      // Guardar estado en URL
+      function guardarEstado() {
+        const title = titulo.textContent;
+        updateURL(contador, title, !modoClaro);
+      }
+
       // Actualizar valor
       function actualizarValor() {
         valor.textContent = contador;
       }
 
-      // Cambiar modo de color: alterna entre #ffffff (por defecto) y #2c2c2b
-      function toggleModoClaro() {
-        modoClaro = !modoClaro;
+      // Actualizar colores según el modo
+      function actualizarColores() {
         const color = modoClaro ? "#2c2c2b" : "#ffffff";
         document
           .querySelectorAll(".titulo, .contador, .boton")
@@ -205,20 +254,30 @@
           });
       }
 
+      // Cambiar modo de color: alterna entre #ffffff (por defecto) y #2c2c2b
+      function toggleModoClaro() {
+        modoClaro = !modoClaro;
+        actualizarColores();
+        guardarEstado();
+      }
+
       // Eventos de botones
       sumarBtn.addEventListener("click", () => {
         contador++;
         actualizarValor();
+        guardarEstado();
       });
 
       restarBtn.addEventListener("click", () => {
         contador--;
         actualizarValor();
+        guardarEstado();
       });
 
       resetBtn.addEventListener("click", () => {
         contador = 0;
         actualizarValor();
+        guardarEstado();
       });
 
       // Doble click en título para editar
@@ -248,6 +307,7 @@
       titulo.addEventListener("blur", () => {
         titulo.contentEditable = false;
         titulo.classList.remove("editando");
+        guardarEstado();
       });
 
       titulo.addEventListener("keydown", (e) => {
@@ -272,6 +332,9 @@
       titulo.addEventListener("dblclick", (e) => {
         e.preventDefault();
       });
+
+      // Cargar estado inicial
+      cargarEstado();
     </script>
   </body>
 </html>
