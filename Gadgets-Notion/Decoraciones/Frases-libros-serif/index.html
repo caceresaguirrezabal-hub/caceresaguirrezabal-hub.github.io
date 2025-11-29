@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widget Línea de Tiempo Literaria</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Lyon-Text:wght@400;500;600&display=swap");
+
+      :root {
+        --text-color-default: #ffffff;
+        --text-color-alt: #2c2c2b;
+        --btn-bg: rgba(255, 255, 255, 0.15);
+        --btn-bg-hover: rgba(255, 255, 255, 0.25);
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .literary-timeline {
+        font-family: Lyon-Text, Georgia, YuMincho, "Yu Mincho",
+          "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC",
+          "Songti SC", SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
+        background: transparent !important;
+        color: var(--text-color-default);
+        width: 100%;
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 20px;
+        transition: var(--transition);
+      }
+
+      .timeline-container {
+        position: relative;
+        padding-left: 30px;
+      }
+
+      .timeline-container::before {
+        content: "";
+        position: absolute;
+        left: 8px;
+        top: 0;
+        height: 100%;
+        width: 2px;
+        background: currentColor;
+        opacity: 0.2;
+      }
+
+      .timeline-item {
+        position: relative;
+        margin-bottom: 42px;
+        padding-left: 25px;
+        transition: var(--transition);
+      }
+
+      .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: -22px;
+        top: 8px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.6;
+      }
+
+      .timeline-book {
+        font-size: 0.9rem;
+        font-weight: 500;
+        opacity: 0.78;
+        margin-bottom: 4px;
+        font-style: italic;
+      }
+
+      .timeline-author {
+        font-size: 0.85rem;
+        opacity: 0.65;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+      }
+
+      .timeline-quote {
+        font-size: 1.45rem;
+        line-height: 1.48;
+        font-weight: 500;
+        margin-bottom: 12px;
+        position: relative;
+      }
+
+      .timeline-quote::before {
+        content: "“";
+        position: absolute;
+        left: -24px;
+        top: -7px;
+        font-size: 2.7rem;
+        opacity: 0.13;
+        line-height: 1;
+      }
+
+      .timeline-quote::after {
+        content: "”";
+        position: absolute;
+        right: -24px;
+        bottom: -18px;
+        font-size: 2.7rem;
+        opacity: 0.13;
+        line-height: 1;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 600px) {
+        .literary-timeline {
+          padding: 15px;
+        }
+
+        .timeline-quote {
+          font-size: 1.28rem;
+        }
+
+        .timeline-quote::before,
+        .timeline-quote::after {
+          font-size: 2.2rem;
+        }
+
+        .timeline-quote::before {
+          left: -20px;
+          top: -6px;
+        }
+
+        .timeline-quote::after {
+          right: -20px;
+          bottom: -16px;
+        }
+
+        .timeline-container {
+          padding-left: 20px;
+        }
+
+        .timeline-container::before {
+          left: 4px;
+        }
+
+        .timeline-item::before {
+          left: -18px;
+        }
+
+        .timeline-item {
+          margin-bottom: 36px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .timeline-quote {
+          font-size: 1.18rem;
+        }
+
+        .timeline-book {
+          font-size: 0.85rem;
+        }
+
+        .timeline-author {
+          font-size: 0.8rem;
+        }
+      }
+
+      .timeline-nav {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .nav-btn {
+        background: var(--btn-bg);
+        color: inherit;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+      }
+
+      .nav-btn:hover {
+        background: var(--btn-bg-hover);
+        transform: translateY(-2px);
+      }
+
+      .nav-btn:active {
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="literary-timeline" id="timeline">
+      <div class="timeline-container">
+        <div class="timeline-item">
+          <div class="timeline-book">Kitchen</div>
+          <div class="timeline-author">— Banana Yoshimoto</div>
+          <div class="timeline-quote">
+            Cuando estás triste, lo más importante es alimentarte bien.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-book">Yo, robot</div>
+          <div class="timeline-author">— Isaac Asimov</div>
+          <div class="timeline-quote">
+            La respuesta más sencilla es, con frecuencia, la correcta.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-book">Cien años de soledad</div>
+          <div class="timeline-author">— Gabriel García Márquez</div>
+          <div class="timeline-quote">
+            El mundo era tan reciente que muchas cosas carecían de nombre.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-book">Mi planta de naranja-lima</div>
+          <div class="timeline-author">— José Mauro de Vasconcelos</div>
+          <div class="timeline-quote">
+            Hay cosas que sólo se aprenden con el corazón.
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-book">La tregua</div>
+          <div class="timeline-author">— Mario Benedetti</div>
+          <div class="timeline-quote">
+            Toda despedida es una muerte pequeña.
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-nav">
+        <button class="nav-btn" id="prev">←</button>
+        <button class="nav-btn" id="next">→</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const timeline = document.getElementById("timeline");
+        const prevBtn = document.getElementById("prev");
+        const nextBtn = document.getElementById("next");
+        const timelineItems = document.querySelectorAll(".timeline-item");
+
+        let currentIndex = 0;
+        const totalItems = timelineItems.length;
+
+        // Function to update active item
+        function updateActiveItem() {
+          timelineItems.forEach((item, index) => {
+            if (index === currentIndex) {
+              item.style.opacity = "1";
+              item.style.transform = "translateX(0)";
+            } else {
+              item.style.opacity = "0.5";
+              item.style.transform =
+                index < currentIndex ? "translateX(-20px)" : "translateX(20px)";
+            }
+          });
+        }
+
+        // Initialize
+        updateActiveItem();
+
+        // Next button
+        nextBtn.addEventListener("click", function () {
+          currentIndex = (currentIndex + 1) % totalItems;
+          updateActiveItem();
+        });
+
+        // Prev button
+        prevBtn.addEventListener("click", function () {
+          currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+          updateActiveItem();
+        });
+
+        // Toggle text color on non-button clicks
+        document.addEventListener("click", function (e) {
+          if (!e.target.classList.contains("nav-btn")) {
+            const currentColor = getComputedStyle(timeline).color;
+            const isDefaultWhite = currentColor === "rgb(255, 255, 255)";
+
+            if (isDefaultWhite) {
+              timeline.style.color = "#2c2c2b";
+            } else {
+              timeline.style.color = "#ffffff";
+            }
+          }
+        });
+
+        // Add subtle animations on load
+        setTimeout(() => {
+          timelineItems.forEach((item, index) => {
+            item.style.transition = "opacity 0.45s ease, transform 0.45s ease";
+            item.style.opacity = index === 0 ? "1" : "0.5";
+            item.style.transform =
+              index === 0 ? "translateX(0)" : "translateX(20px)";
+          });
+        }, 100);
+      });
+    </script>
+  </body>
+</html>
